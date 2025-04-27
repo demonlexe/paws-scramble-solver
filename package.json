@@ -5,11 +5,12 @@
   "description": "A basic Plasmo extension.",
   "author": "Alexis Kaufman",
   "scripts": {
-    "dev": "plasmo dev",
-    "build": "plasmo build",
+    "dev": "repomix && plasmo dev",
+    "build": "repomix && plasmo build",
     "package": "plasmo package"
   },
   "dependencies": {
+    "jquery": "^3.7.1",
     "plasmo": "0.88.0",
     "react": "18.2.0",
     "react-dom": "18.2.0"
@@ -25,7 +26,7 @@
   },
   "manifest": {
     "host_permissions": [
-      "https://*/*"
+      "https://www.furry-paws.com/game/scramble"
     ]
   }
 }

@@ -1,0 +1,306 @@
+This file is a merged representation of the entire codebase, combined into a single document by Repomix.
+
+<file_summary>
+This section contains a summary of this file.
+
+<purpose>
+This file contains a packed representation of the entire repository's contents.
+It is designed to be easily consumable by AI systems for analysis, code review,
+or other automated processes.
+</purpose>
+
+<file_format>
+The content is organized as follows:
+1. This summary section
+2. Repository information
+3. Directory structure
+4. Repository files (if enabled)
+4. Repository files, each consisting of:
+  - File path as an attribute
+  - Full contents of the file
+</file_format>
+
+<usage_guidelines>
+- This file should be treated as read-only. Any changes should be made to the
+  original repository files, not this packed version.
+- When processing this file, use the file path to distinguish
+  between different files in the repository.
+- Be aware that this file may contain sensitive information. Handle it with
+  the same level of security as you would the original repository.
+</usage_guidelines>
+
+<notes>
+- Some files may have been excluded based on .gitignore rules and Repomix's configuration
+- Binary files are not included in this packed representation. Please refer to the Repository Structure section for a complete list of file paths, including binary files
+- Files matching patterns in .gitignore are excluded
+- Files matching default ignore patterns are excluded
+- Files are sorted by Git change count (files with more changes are at the bottom)
+</notes>
+
+<additional_info>
+
+</additional_info>
+
+</file_summary>
+
+<directory_structure>
+.github/
+  workflows/
+    submit.yml
+.gitignore
+.prettierrc.mjs
+content.ts
+package.json
+popup.tsx
+README.md
+tsconfig.json
+</directory_structure>
+
+<files>
+This section contains the contents of the repository's files.
+
+<file path="content.ts">
+import $ from "jquery"
+import type { PlasmoCSConfig } from "plasmo"
+
+// for https://www.furry-paws.com/game/scramble, let's check #fpaw_layout_column_2 for div.text_large.add_margins centered
+export const config: PlasmoCSConfig = {
+  matches: ["https://www.furry-paws.com/game/scramble"]
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+  const targetElement = document.querySelector(
+    "#fpaw_layout_column_2 .text_large.add_margins"
+  )
+  if (targetElement) {
+    console.log("Element found:", targetElement.textContent?.trim())
+  } else {
+    console.log("Element not found.")
+  }
+})
+</file>
+
+<file path=".github/workflows/submit.yml">
+name: "Submit to Web Store"
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Cache pnpm modules
+        uses: actions/cache@v3
+        with:
+          path: ~/.pnpm-store
+          key: ${{ runner.os }}-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-
+      - uses: pnpm/action-setup@v2.2.4
+        with:
+          version: latest
+          run_install: true
+      - name: Use Node.js 16.x
+        uses: actions/setup-node@v3.4.1
+        with:
+          node-version: 16.x
+          cache: "pnpm"
+      - name: Build the extension
+        run: pnpm build
+      - name: Package the extension into a zip artifact
+        run: pnpm package
+      - name: Browser Platform Publish
+        uses: PlasmoHQ/bpp@v3
+        with:
+          keys: ${{ secrets.SUBMIT_KEYS }}
+          artifact: build/chrome-mv3-prod.zip
+</file>
+
+<file path=".gitignore">
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+/.pnp
+.pnp.js
+
+# testing
+/coverage
+
+# misc
+.DS_Store
+*.pem
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# local env files
+.env*.local
+
+out/
+build/
+dist/
+
+# plasmo
+.plasmo
+
+# typescript
+.tsbuildinfo
+</file>
+
+<file path=".prettierrc.mjs">
+/**
+ * @type {import('prettier').Options}
+ */
+export default {
+  printWidth: 80,
+  tabWidth: 2,
+  useTabs: false,
+  semi: false,
+  singleQuote: false,
+  trailingComma: "none",
+  bracketSpacing: true,
+  bracketSameLine: true,
+  plugins: ["@ianvs/prettier-plugin-sort-imports"],
+  importOrder: [
+    "<BUILTIN_MODULES>", // Node.js built-in modules
+    "<THIRD_PARTY_MODULES>", // Imports not matched by other special words or groups.
+    "", // Empty line
+    "^@plasmo/(.*)$",
+    "",
+    "^@plasmohq/(.*)$",
+    "",
+    "^~(.*)$",
+    "",
+    "^[./]"
+  ]
+}
+</file>
+
+<file path="package.json">
+{
+  "name": "paws-scramble-solver",
+  "displayName": "Paws scramble solver",
+  "version": "0.0.1",
+  "description": "A basic Plasmo extension.",
+  "author": "Alexis Kaufman",
+  "scripts": {
+    "dev": "repomix && plasmo dev",
+    "build": "repomix && plasmo build",
+    "package": "plasmo package"
+  },
+  "dependencies": {
+    "jquery": "^3.7.1",
+    "plasmo": "0.88.0",
+    "react": "18.2.0",
+    "react-dom": "18.2.0"
+  },
+  "devDependencies": {
+    "@ianvs/prettier-plugin-sort-imports": "4.1.1",
+    "@types/chrome": "0.0.258",
+    "@types/node": "20.11.5",
+    "@types/react": "18.2.48",
+    "@types/react-dom": "18.2.18",
+    "prettier": "3.2.4",
+    "typescript": "5.3.3"
+  },
+  "manifest": {
+    "host_permissions": [
+      "https://www.furry-paws.com/game/scramble"
+    ]
+  }
+}
+</file>
+
+<file path="popup.tsx">
+import { useState } from "react"
+
+function IndexPopup() {
+  const [data, setData] = useState("")
+
+  return (
+    <div
+      style={{
+        padding: 16
+      }}>
+      <h2>
+        Welcome to your{" "}
+        <a href="https://www.plasmo.com" target="_blank">
+          Plasmo
+        </a>{" "}
+        Extension!
+      </h2>
+      <input onChange={(e) => setData(e.target.value)} value={data} />
+      <a href="https://docs.plasmo.com" target="_blank">
+        View Docs
+      </a>
+    </div>
+  )
+}
+
+export default IndexPopup
+</file>
+
+<file path="README.md">
+This is a [Plasmo extension](https://docs.plasmo.com/) project bootstrapped with [`plasmo init`](https://www.npmjs.com/package/plasmo).
+
+## Getting Started
+
+First, run the development server:
+
+```bash
+pnpm dev
+# or
+npm run dev
+```
+
+Open your browser and load the appropriate development build. For example, if you are developing for the chrome browser, using manifest v3, use: `build/chrome-mv3-dev`.
+
+You can start editing the popup by modifying `popup.tsx`. It should auto-update as you make changes. To add an options page, simply add a `options.tsx` file to the root of the project, with a react component default exported. Likewise to add a content page, add a `content.ts` file to the root of the project, importing some module and do some logic, then reload the extension on your browser.
+
+For further guidance, [visit our Documentation](https://docs.plasmo.com/)
+
+## Making production build
+
+Run the following:
+
+```bash
+pnpm build
+# or
+npm run build
+```
+
+This should create a production bundle for your extension, ready to be zipped and published to the stores.
+
+## Submit to the webstores
+
+The easiest way to deploy your Plasmo extension is to use the built-in [bpp](https://bpp.browser.market) GitHub action. Prior to using this action however, make sure to build your extension and upload the first version to the store to establish the basic credentials. Then, simply follow [this setup instruction](https://docs.plasmo.com/framework/workflows/submit) and you should be on your way for automated submission!
+</file>
+
+<file path="tsconfig.json">
+{
+  "extends": "plasmo/templates/tsconfig.base",
+  "exclude": [
+    "node_modules"
+  ],
+  "include": [
+    ".plasmo/index.d.ts",
+    "./**/*.ts",
+    "./**/*.tsx"
+  ],
+  "compilerOptions": {
+    "paths": {
+      "~*": [
+        "./*"
+      ]
+    },
+    "baseUrl": "."
+  }
+}
+</file>
+
+</files>
